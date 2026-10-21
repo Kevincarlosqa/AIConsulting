@@ -1,0 +1,44 @@
+:root {
+  /* Color — graphite greys with a restrained gold accent */
+  --color-bg: #0e0f11;
+  --color-surface: #16171a;
+  --color-surface-2: #1d1e22;
+  --color-text: #ecebe7;
+  --color-muted: #b0afab;
+  --color-subtle: #82817d;
+  --color-line: rgba(236, 235, 231, 0.1);
+  --color-line-strong: rgba(236, 235, 231, 0.2);
+  --color-gold: #c9a45c;
+  --color-gold-light: #dcc08a;
+  --color-gold-deep: #9c7c3f;
+  --color-error: #e0917f;
+  --color-success: #9fc0a2;
+
+  /* Type */
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Instrument Serif', 'Times New Roman', serif;
+
+  /* Sizes track both width and height so the hero fits short laptop screens */
+  --text-display: clamp(38px, min(6.6vw, 11vh), 104px);
+  --text-heading-xl: clamp(36px, min(5.2vw, 9vh), 84px);
+  --text-heading-lg: clamp(32px, min(4vw, 7.5vh), 60px);
+  --text-heading: clamp(28px, min(2.8vw, 5.5vh), 44px);
+  --text-statement: clamp(22px, 2.2vw, 34px);
+  --text-lead: clamp(16px, 1.2vw, 19px);
+  --text-body: clamp(15px, 1.05vw, 17px);
+  --text-small: 14px;
+  --text-label: 12px;
+
+  /* Layout */
+  --page-max: 1280px;
+  --gutter: clamp(20px, 5vw, 80px);
+  --section-pad: clamp(88px, 11vw, 150px);
+  --radius: 16px;
+  --radius-pill: 999px;
+
+  /* Soft dark halo that keeps copy legible over the particle field */
+  --text-halo: 0 1px 2px rgba(14, 15, 17, 0.9), 0 0 24px rgba(14, 15, 17, 0.85);
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

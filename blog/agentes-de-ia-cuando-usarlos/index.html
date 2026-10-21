@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es-PE">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Agentes de IA en la empresa: cuándo usarlos y cuándo un flujo simple es mejor — Blog de A.I. Consulting</title>
+    <meta name="description" content="No todo problema necesita un agente autónomo. Cómo elegir entre un flujo determinista y un agente, y cómo limitar lo que ese agente puede hacer." />
+    <meta name="author" content="Kevin Quispe Aquise" />
+    <meta name="theme-color" content="#0e0f11" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Agentes de IA en la empresa: cuándo usarlos y cuándo un flujo simple es mejor" />
+    <meta property="og:description" content="No todo problema necesita un agente autónomo. Cómo elegir entre un flujo determinista y un agente, y cómo limitar lo que ese agente puede hacer." />
+    <meta property="og:locale" content="es_PE" />
+    <meta property="article:published_time" content="2026-06-09" />
+    <meta property="article:author" content="Kevin Quispe Aquise" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Agentes de IA en la empresa: cuándo usarlos y cuándo un flujo simple es mejor", "description": "No todo problema necesita un agente autónomo. Cómo elegir entre un flujo determinista y un agente, y cómo limitar lo que ese agente puede hacer.", "datePublished": "2026-06-09", "inLanguage": "es-PE", "author": {"@type": "Person", "name": "Kevin Quispe Aquise", "jobTitle": "Senior Software Engineer y AI Engineer"}, "publisher": {"@type": "Organization", "name": "A.I. Consulting (Andes Intelligence Consulting)"}}</script>
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
+    <!-- include:head -->
+  </head>
+  <body data-page="blog">
+    <div class="read-progress" aria-hidden="true"><i data-progress></i></div>
+    <!-- include:header -->
+
+    <main>
+      <article class="post" data-article data-slug="agentes-de-ia-cuando-usarlos">
+        <header class="post-hero">
+          <div class="container">
+            <nav class="crumbs" aria-label="Ruta"><a href="/blog/">Blog</a><span aria-hidden="true">/</span><span>Agentes</span></nav>
+            <h1 class="post-title" data-reveal>Agentes de IA en la empresa: cuándo usarlos y cuándo un flujo simple es mejor</h1>
+            <p class="post-dek" data-reveal>No todo problema necesita un agente autónomo. Cómo elegir entre un flujo determinista y un agente, y cómo limitar lo que ese agente puede hacer.</p>
+            <div class="post-meta" data-reveal>
+              <span class="avatar">KQ</span>
+              <div class="post-meta-author"><b>Kevin Quispe Aquise</b><small>Senior Software Engineer y AI Engineer en Interbank · Líder técnico</small></div>
+              <p class="post-meta-date"><time datetime="2026-06-09">9 de junio de 2026</time><span>7 min de lectura</span></p>
+            </div>
+          </div>
+        </header>
+
+        <div class="container post-layout">
+          <aside class="post-aside">
+            <p class="toc-label">En este artículo</p>
+            <ol class="toc" data-toc></ol>
+            <button class="copy-link" type="button" data-copy-link>Copiar enlace</button>
+          </aside>
+
+          <div class="prose">
+<p>"Agente" se convirtió en la palabra de moda. Según la encuesta de McKinsey de 2025, el 23&nbsp;% de los encuestados dice que su organización ya está escalando un sistema agéntico en alguna parte de la empresa y otro 39&nbsp;% afirma que empezó a experimentar con agentes <a class="cite" href="#ref-2" aria-label="Referencia 2">[2]</a>. La pregunta útil no es si usar agentes, sino dónde tienen sentido.</p>
+
+<h2>Flujos y agentes no son lo mismo</h2>
+<p>Anthropic propone una distinción que uso en cada proyecto <a class="cite" href="#ref-1" aria-label="Referencia 1">[1]</a>:</p>
+<ul>
+  <li><strong>Flujos de trabajo (workflows):</strong> sistemas donde los LLM y las herramientas se orquestan mediante rutas de código predefinidas. Tú decides los pasos; el modelo ejecuta las partes que requieren lenguaje.</li>
+  <li><strong>Agentes:</strong> sistemas donde el LLM dirige dinámicamente su propio proceso y decide qué herramientas usar y en qué orden.</li>
+</ul>
+<p>La misma guía describe patrones de flujo muy prácticos antes de llegar a un agente: encadenar prompts, enrutar según el tipo de solicitud, paralelizar tareas, usar un orquestador con trabajadores y combinar un generador con un evaluador <a class="cite" href="#ref-1" aria-label="Referencia 1">[1]</a>.</p>
+
+<h2>Cómo decido</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Si el problema…</th><th>Usa</th></tr></thead>
+  <tbody>
+    <tr><td>Tiene pasos conocidos y repetibles (clasificar, extraer, responder con plantilla)</td><td>Flujo</td></tr>
+    <tr><td>Requiere auditoría estricta y resultados predecibles</td><td>Flujo</td></tr>
+    <tr><td>Tiene un camino que depende de lo que se descubre en el proceso</td><td>Agente</td></tr>
+    <tr><td>Combina muchas herramientas cuyo orden no se puede prever</td><td>Agente</td></tr>
+    <tr><td>Tolera más latencia y costo a cambio de flexibilidad</td><td>Agente</td></tr>
+  </tbody>
+</table>
+</div>
+<p>En mi experiencia, la mayoría de casos empresariales se resuelven con flujos, y los agentes aparecen en tareas abiertas como investigación, soporte técnico de segundo nivel o desarrollo de software. Anthropic lo resume así: empieza con lo más simple y agrega complejidad solo cuando demuestre una mejora clara <a class="cite" href="#ref-1" aria-label="Referencia 1">[1]</a>.</p>
+
+<h2>Limitar lo que el agente puede hacer</h2>
+<p>El OWASP Top 10 para LLM llama <strong>agencia excesiva</strong> al riesgo de dar a un sistema más funcionalidad, permisos o autonomía de los necesarios <a class="cite" href="#ref-3" aria-label="Referencia 3">[3]</a>. Con agentes, ese riesgo deja de ser teórico. Estas son las barreras que aplico:</p>
+<ul>
+  <li><strong>Herramientas específicas, no genéricas.</strong> Mejor <code>consultar_estado_pedido(id)</code> que un acceso libre a la base de datos.</li>
+  <li><strong>Aprobación humana</strong> para acciones irreversibles: pagos, envíos externos, borrados, cambios de configuración.</li>
+  <li><strong>Presupuestos de ejecución:</strong> número máximo de pasos, tiempo y costo por tarea.</li>
+  <li><strong>Entornos aislados</strong> para ejecutar código o navegar la web.</li>
+  <li><strong>Romper la trifecta letal.</strong> Ningún agente debería combinar datos privados, contenido no confiable y un canal de salida sin control <a class="cite" href="#ref-4" aria-label="Referencia 4">[4]</a>.</li>
+  <li><strong>Observabilidad:</strong> cada decisión, herramienta invocada y resultado queda registrado para auditar y mejorar.</li>
+</ul>
+
+<h2>Un ejemplo concreto</h2>
+<p>Un área de atención al cliente quiere "un agente que resuelva reclamos". Al analizarlo, el 80&nbsp;% de los reclamos son de cuatro tipos con pasos conocidos. Diseñamos un flujo: clasificar el reclamo, recuperar la información del cliente, redactar la respuesta y pedir aprobación cuando hay compensación económica. El 20&nbsp;% restante, más abierto, pasa a un agente con herramientas de solo lectura que prepara un expediente para un analista humano. Resultado: rapidez donde hay volumen y criterio humano donde hay riesgo.</p>
+
+<h2>En resumen</h2>
+<p>Los agentes son una herramienta poderosa, no un objetivo. Usa flujos cuando el camino es conocido, agentes cuando no lo es, y en ambos casos limita los permisos al mínimo necesario.</p>
+            <section class="post-refs" aria-labelledby="refs-title">
+              <h2 id="refs-title">Referencias</h2>
+              <ol>
+                <li id="ref-1">Anthropic (19 de diciembre de 2024). <em>Building effective agents</em>. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a></li>
+                <li id="ref-2">McKinsey &amp; Company (noviembre de 2025). <em>The state of AI in 2025: Agents, innovation, and transformation</em>. <a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai" target="_blank" rel="noopener noreferrer">https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai</a></li>
+                <li id="ref-3">OWASP GenAI Security Project. <em>OWASP Top 10 for LLM Applications 2025</em> (LLM06: Excessive Agency). <a href="https://genai.owasp.org/llm-top-10/" target="_blank" rel="noopener noreferrer">https://genai.owasp.org/llm-top-10/</a></li>
+                <li id="ref-4">Willison, S. (16 de junio de 2025). <em>The lethal trifecta for AI agents: private data, untrusted content, and external communication</em>. <a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/" target="_blank" rel="noopener noreferrer">https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/</a></li>
+              </ol>
+            </section>
+
+            <section class="author-box" data-author-box aria-label="Sobre el autor"></section>
+          </div>
+        </div>
+      </article>
+
+      <section class="container related">
+        <h2 class="heading">Sigue leyendo</h2>
+        <div class="post-grid" data-related></div>
+      </section>
+
+      <section class="container post-cta">
+        <div>
+          <p class="eyebrow">A.I. Consulting</p>
+          <h2 class="heading">¿Quieres aplicar esto en <em>tu empresa?</em></h2>
+          <p>Te ayudamos a diseñar, construir y operar soluciones de IA seguras y con resultados medibles.</p>
+        </div>
+        <a class="btn btn-primary" href="/#contacto">Agenda una llamada</a>
+      </section>
+    </main>
+
+    <!-- include:footer -->
+
+    <script type="module" src="/src/page.js"></script>
+  </body>
+</html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es-PE">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>MCP: el estándar que conecta la IA con tus sistemas (y cómo usarlo sin abrirle la puerta a atacantes) — Blog de A.I. Consulting</title>
+    <meta name="description" content="Qué es el Model Context Protocol, por qué se convirtió en el &quot;USB-C de la IA&quot; y qué controles aplicar antes de conectar un servidor MCP a los datos de tu empresa." />
+    <meta name="author" content="Kevin Quispe Aquise" />
+    <meta name="theme-color" content="#0e0f11" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="MCP: el estándar que conecta la IA con tus sistemas (y cómo usarlo sin abrirle la puerta a atacantes)" />
+    <meta property="og:description" content="Qué es el Model Context Protocol, por qué se convirtió en el &quot;USB-C de la IA&quot; y qué controles aplicar antes de conectar un servidor MCP a los datos de tu empresa." />
+    <meta property="og:locale" content="es_PE" />
+    <meta property="article:published_time" content="2026-08-18" />
+    <meta property="article:author" content="Kevin Quispe Aquise" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "MCP: el estándar que conecta la IA con tus sistemas (y cómo usarlo sin abrirle la puerta a atacantes)", "description": "Qué es el Model Context Protocol, por qué se convirtió en el \"USB-C de la IA\" y qué controles aplicar antes de conectar un servidor MCP a los datos de tu empresa.", "datePublished": "2026-08-18", "inLanguage": "es-PE", "author": {"@type": "Person", "name": "Kevin Quispe Aquise", "jobTitle": "Senior Software Engineer y AI Engineer"}, "publisher": {"@type": "Organization", "name": "A.I. Consulting (Andes Intelligence Consulting)"}}</script>
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
+    <!-- include:head -->
+  </head>
+  <body data-page="blog">
+    <div class="read-progress" aria-hidden="true"><i data-progress></i></div>
+    <!-- include:header -->
+
+    <main>
+      <article class="post" data-article data-slug="mcp-model-context-protocol-empresas">
+        <header class="post-hero">
+          <div class="container">
+            <nav class="crumbs" aria-label="Ruta"><a href="/blog/">Blog</a><span aria-hidden="true">/</span><span>MCP</span></nav>
+            <h1 class="post-title" data-reveal>MCP: el estándar que conecta la IA con tus sistemas (y cómo usarlo sin abrirle la puerta a atacantes)</h1>
+            <p class="post-dek" data-reveal>Qué es el Model Context Protocol, por qué se convirtió en el "USB-C de la IA" y qué controles aplicar antes de conectar un servidor MCP a los datos de tu empresa.</p>
+            <div class="post-meta" data-reveal>
+              <span class="avatar">KQ</span>
+              <div class="post-meta-author"><b>Kevin Quispe Aquise</b><small>Senior Software Engineer y AI Engineer en Interbank · Líder técnico</small></div>
+              <p class="post-meta-date"><time datetime="2026-08-18">18 de agosto de 2026</time><span>8 min de lectura</span></p>
+            </div>
+          </div>
+        </header>
+
+        <div class="container post-layout">
+          <aside class="post-aside">
+            <p class="toc-label">En este artículo</p>
+            <ol class="toc" data-toc></ol>
+            <button class="copy-link" type="button" data-copy-link>Copiar enlace</button>
+          </aside>
+
+          <div class="prose">
+<p>Hasta hace poco, conectar un asistente de IA con los sistemas de una empresa significaba construir una integración a medida por cada combinación de modelo y herramienta: una para el CRM, otra para la base de datos, otra para el gestor documental. Con varios modelos y decenas de sistemas, el número de integraciones crece rápido y cada una se mantiene por separado.</p>
+<p>El <strong>Model Context Protocol (MCP)</strong> nació para resolver exactamente ese problema.</p>
+
+<h2>Qué es MCP</h2>
+<p>Anthropic presentó MCP el 25 de noviembre de 2024 como un estándar abierto para conectar asistentes de IA con los lugares donde viven los datos: repositorios de documentos, herramientas de negocio y entornos de desarrollo. Junto con el anuncio publicó servidores listos para Google Drive, Slack, GitHub, Git, Postgres y Puppeteer <a class="cite" href="#ref-1" aria-label="Referencia 1">[1]</a>.</p>
+<p>La propia documentación del protocolo lo explica con una analogía que se volvió popular: MCP es como un puerto USB-C para aplicaciones de IA. Así como USB-C estandariza cómo se conectan los dispositivos, MCP estandariza cómo una aplicación de IA se conecta con sistemas externos <a class="cite" href="#ref-2" aria-label="Referencia 2">[2]</a>. Hoy lo soportan asistentes y herramientas como Claude, ChatGPT, Visual Studio Code y Cursor, entre muchos otros <a class="cite" href="#ref-2" aria-label="Referencia 2">[2]</a>.</p>
+
+<h2>Cómo funciona</h2>
+<p>La arquitectura tiene tres piezas <a class="cite" href="#ref-3" aria-label="Referencia 3">[3]</a>:</p>
+<ul>
+  <li><strong>Host:</strong> la aplicación que usa la persona, como un asistente de escritorio, un IDE o el chat interno de tu empresa.</li>
+  <li><strong>Cliente:</strong> el componente dentro del host que mantiene la conexión con cada servidor.</li>
+  <li><strong>Servidor:</strong> el programa que expone capacidades de un sistema concreto, por ejemplo tu ERP.</li>
+</ul>
+<p>Un servidor puede ofrecer tres tipos de capacidades: <strong>herramientas</strong> que el modelo puede invocar ("crear ticket", "consultar saldo"), <strong>recursos</strong> que aportan contexto (documentos, registros) y <strong>prompts</strong> o plantillas reutilizables. La comunicación usa JSON-RPC, ya sea de forma local mediante entrada y salida estándar (stdio) o remota mediante HTTP.</p>
+<p>La consecuencia para una empresa es importante: construyes un servidor MCP para tu sistema una sola vez y cualquier aplicación compatible puede usarlo.</p>
+
+<h2>El protocolo maduró en seguridad</h2>
+<p>MCP evoluciona mediante revisiones fechadas de su especificación. La revisión del 18 de junio de 2025, por ejemplo, clasificó a los servidores MCP como <em>resource servers</em> de OAuth, añadió metadatos para descubrir el servidor de autorización correspondiente y exigió a los clientes usar <em>resource indicators</em> (RFC 8707) para evitar que un servidor malicioso obtenga tokens destinados a otro <a class="cite" href="#ref-4" aria-label="Referencia 4">[4]</a>. También incorporó salidas estructuradas de herramientas y la capacidad de que un servidor solicite información adicional al usuario durante una interacción.</p>
+<p>Esto es clave: un servidor remoto expuesto a internet debe tratarse como cualquier API corporativa, con autenticación, autorización y auditoría.</p>
+
+<h2>Los riesgos que más me preocupan</h2>
+<p>El modelo decide qué herramienta usar leyendo su descripción. Eso convierte la descripción en una superficie de ataque. En abril de 2025, Invariant Labs documentó los <strong>tool poisoning attacks</strong>: instrucciones maliciosas escondidas en la descripción de una herramienta, visibles para el modelo pero no para el usuario, capaces de inducirlo a leer archivos sensibles y filtrarlos <a class="cite" href="#ref-5" aria-label="Referencia 5">[5]</a>. El mismo trabajo describe dos variantes:</p>
+<ul>
+  <li><strong>Rug pull:</strong> un servidor cambia la descripción de sus herramientas después de que el usuario lo aprobó.</li>
+  <li><strong>Shadowing:</strong> un servidor malicioso altera cómo el agente usa las herramientas de otro servidor confiable.</li>
+</ul>
+<p>Si sumas a esto la "agencia excesiva" del OWASP Top 10 para LLM <a class="cite" href="#ref-6" aria-label="Referencia 6">[6]</a>, el resultado es claro: conectar servidores MCP de terceros sin revisión es equivalente a instalar dependencias desconocidas con acceso a tus datos.</p>
+
+<h2>Checklist antes de conectar un servidor MCP</h2>
+<ul>
+  <li><strong>Inventario y procedencia.</strong> Usa solo servidores de fuentes confiables o construidos por tu equipo, y revisa su código.</li>
+  <li><strong>Fija versiones.</strong> Fijar versión o hash de servidores y herramientas permite detectar cambios no autorizados en sus descripciones, como recomienda Invariant Labs <a class="cite" href="#ref-5" aria-label="Referencia 5">[5]</a>.</li>
+  <li><strong>Mínimo privilegio.</strong> Cada servidor recibe credenciales propias, con permisos de solo lectura salvo que la escritura sea indispensable.</li>
+  <li><strong>Confirmación humana</strong> para cualquier herramienta que modifique datos, envíe información o mueva dinero.</li>
+  <li><strong>Aislamiento entre servidores.</strong> Evita que un mismo agente combine acceso a datos internos, contenido externo y un canal de salida.</li>
+  <li><strong>Autenticación OAuth y auditoría</strong> en servidores remotos, con registro de cada llamada a herramienta.</li>
+</ul>
+
+<h2>En resumen</h2>
+<p>MCP es probablemente la forma más eficiente de conectar la IA con los sistemas de una empresa: estándar, abierta y con un ecosistema enorme. Pero un servidor MCP no es un plugin inocente; es una puerta hacia tus datos. Trátalo con el mismo rigor que una API en producción y obtendrás la velocidad del estándar sin heredar sus riesgos.</p>
+            <section class="post-refs" aria-labelledby="refs-title">
+              <h2 id="refs-title">Referencias</h2>
+              <ol>
+                <li id="ref-1">Anthropic (25 de noviembre de 2024). <em>Introducing the Model Context Protocol</em>. <a href="https://www.anthropic.com/news/model-context-protocol" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/news/model-context-protocol</a></li>
+                <li id="ref-2">Model Context Protocol. <em>What is the Model Context Protocol (MCP)?</em> Documentación oficial. <a href="https://modelcontextprotocol.io/docs/getting-started/intro" target="_blank" rel="noopener noreferrer">https://modelcontextprotocol.io/docs/getting-started/intro</a></li>
+                <li id="ref-3">Model Context Protocol. <em>Specification</em>, revisión 2025-06-18. <a href="https://modelcontextprotocol.io/specification/2025-06-18" target="_blank" rel="noopener noreferrer">https://modelcontextprotocol.io/specification/2025-06-18</a></li>
+                <li id="ref-4">Model Context Protocol. <em>Key Changes</em>, revisión 2025-06-18. <a href="https://modelcontextprotocol.io/specification/2025-06-18/changelog" target="_blank" rel="noopener noreferrer">https://modelcontextprotocol.io/specification/2025-06-18/changelog</a></li>
+                <li id="ref-5">Invariant Labs (1 de abril de 2025). <em>MCP Security Notification: Tool Poisoning Attacks</em>. <a href="https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks" target="_blank" rel="noopener noreferrer">https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks</a></li>
+                <li id="ref-6">OWASP GenAI Security Project. <em>OWASP Top 10 for LLM Applications 2025</em> (LLM06: Excessive Agency). <a href="https://genai.owasp.org/llm-top-10/" target="_blank" rel="noopener noreferrer">https://genai.owasp.org/llm-top-10/</a></li>
+              </ol>
+            </section>
+
+            <section class="author-box" data-author-box aria-label="Sobre el autor"></section>
+          </div>
+        </div>
+      </article>
+
+      <section class="container related">
+        <h2 class="heading">Sigue leyendo</h2>
+        <div class="post-grid" data-related></div>
+      </section>
+
+      <section class="container post-cta">
+        <div>
+          <p class="eyebrow">A.I. Consulting</p>
+          <h2 class="heading">¿Quieres aplicar esto en <em>tu empresa?</em></h2>
+          <p>Te ayudamos a diseñar, construir y operar soluciones de IA seguras y con resultados medibles.</p>
+        </div>
+        <a class="btn btn-primary" href="/#contacto">Agenda una llamada</a>
+      </section>
+    </main>
+
+    <!-- include:footer -->
+
+    <script type="module" src="/src/page.js"></script>
+  </body>
+</html>

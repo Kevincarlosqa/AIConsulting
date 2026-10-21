@@ -1,0 +1,36 @@
+    <!-- Critical styles: paint the dark canvas and the transition curtain before any CSS file loads -->
+    <style>
+      html {
+        background: #0e0f11;
+        color-scheme: dark;
+      }
+      .js .pt {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+      }
+      .js .pt-panels {
+        position: absolute;
+        inset: 0;
+      }
+      .js .pt-panels i {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: calc(var(--i) * 20% - 1px);
+        width: calc(20% + 2px);
+        background: #131417;
+      }
+      html:not(.js) .pt {
+        display: none;
+      }
+      /* Failsafe: if the scripts never run, the curtain still gets out of the way */
+      .js:not(.pt-ready) .pt {
+        animation: pt-failsafe 0s 4s forwards;
+      }
+      @keyframes pt-failsafe {
+        to {
+          visibility: hidden;
+        }
+      }
+    </style>

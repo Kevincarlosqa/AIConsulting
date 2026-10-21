@@ -1,0 +1,49 @@
+    <!-- Page transition curtain: covers the page on arrival and before leaving -->
+    <div class="pt" data-pt aria-hidden="true">
+      <div class="pt-panels"><i style="--i: 0"></i><i style="--i: 1"></i><i style="--i: 2"></i><i style="--i: 3"></i><i style="--i: 4"></i></div>
+      <div class="pt-center">
+        <svg class="pt-logo" viewBox="0 0 32 32">
+          <path class="pt-peak pt-peak--b" pathLength="100" d="M14 27 L21.5 11 L29 27 Z" />
+          <path class="pt-peak pt-peak--a" pathLength="100" d="M3 27 L12.5 6 L22 27 Z" />
+        </svg>
+        <p class="pt-label" data-pt-label>A.I. Consulting</p>
+        <span class="pt-line"><i></i></span>
+      </div>
+    </div>
+
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id="logo-a" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ecebe7" />
+          <stop offset="1" stop-color="#8f8f8c" />
+        </linearGradient>
+        <linearGradient id="logo-b" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#dcc08a" />
+          <stop offset="1" stop-color="#9c7c3f" />
+        </linearGradient>
+        <!-- Two Andean peaks: the brand mark of Andes Intelligence -->
+        <symbol id="logo" viewBox="0 0 32 32">
+          <path d="M14 27 L21.5 11 L29 27 Z" fill="url(#logo-b)" />
+          <path d="M3 27 L12.5 6 L22 27 Z" fill="url(#logo-a)" />
+          <path d="M12.5 6 L15.4 12.4 L12.5 10.9 L9.6 12.4 Z" fill="#0e0f11" opacity="0.45" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <header class="top-bar">
+      <a class="logo" href="/" aria-label="A.I. Consulting, inicio">
+        <svg class="logo-mark" aria-hidden="true"><use href="#logo" /></svg>
+        <span class="logo-word"><b>A.I.</b> Consulting</span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menú</button>
+
+      <nav class="nav" id="primary-nav" aria-label="Navegación principal">
+        <a class="nav-link" href="/#servicios" data-nav="servicios">Servicios</a>
+        <a class="nav-link" href="/#soluciones" data-nav="soluciones">Soluciones</a>
+        <a class="nav-link" href="/#proyectos" data-nav="proyectos">Proyectos</a>
+        <a class="nav-link" href="/blog/" data-nav="blog">Blog</a>
+        <a class="nav-link" href="/#contacto" data-nav="contacto">Contacto</a>
+        <a class="btn btn-primary btn-small" href="/#contacto">Agenda una llamada</a>
+      </nav>
+    </header>

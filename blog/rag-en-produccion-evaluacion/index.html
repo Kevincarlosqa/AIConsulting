@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es-PE">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>RAG en producción: cómo construir y evaluar un asistente que responde con tus documentos — Blog de A.I. Consulting</title>
+    <meta name="description" content="Recuperar el contexto correcto importa más que el modelo. Técnicas de recuperación, métricas de evaluación y los errores más comunes al pasar de la demo a producción." />
+    <meta name="author" content="Kevin Quispe Aquise" />
+    <meta name="theme-color" content="#0e0f11" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="RAG en producción: cómo construir y evaluar un asistente que responde con tus documentos" />
+    <meta property="og:description" content="Recuperar el contexto correcto importa más que el modelo. Técnicas de recuperación, métricas de evaluación y los errores más comunes al pasar de la demo a producción." />
+    <meta property="og:locale" content="es_PE" />
+    <meta property="article:published_time" content="2026-05-12" />
+    <meta property="article:author" content="Kevin Quispe Aquise" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "RAG en producción: cómo construir y evaluar un asistente que responde con tus documentos", "description": "Recuperar el contexto correcto importa más que el modelo. Técnicas de recuperación, métricas de evaluación y los errores más comunes al pasar de la demo a producción.", "datePublished": "2026-05-12", "inLanguage": "es-PE", "author": {"@type": "Person", "name": "Kevin Quispe Aquise", "jobTitle": "Senior Software Engineer y AI Engineer"}, "publisher": {"@type": "Organization", "name": "A.I. Consulting (Andes Intelligence Consulting)"}}</script>
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
+    <!-- include:head -->
+  </head>
+  <body data-page="blog">
+    <div class="read-progress" aria-hidden="true"><i data-progress></i></div>
+    <!-- include:header -->
+
+    <main>
+      <article class="post" data-article data-slug="rag-en-produccion-evaluacion">
+        <header class="post-hero">
+          <div class="container">
+            <nav class="crumbs" aria-label="Ruta"><a href="/blog/">Blog</a><span aria-hidden="true">/</span><span>RAG</span></nav>
+            <h1 class="post-title" data-reveal>RAG en producción: cómo construir y evaluar un asistente que responde con tus documentos</h1>
+            <p class="post-dek" data-reveal>Recuperar el contexto correcto importa más que el modelo. Técnicas de recuperación, métricas de evaluación y los errores más comunes al pasar de la demo a producción.</p>
+            <div class="post-meta" data-reveal>
+              <span class="avatar">KQ</span>
+              <div class="post-meta-author"><b>Kevin Quispe Aquise</b><small>Senior Software Engineer y AI Engineer en Interbank · Líder técnico</small></div>
+              <p class="post-meta-date"><time datetime="2026-05-12">12 de mayo de 2026</time><span>8 min de lectura</span></p>
+            </div>
+          </div>
+        </header>
+
+        <div class="container post-layout">
+          <aside class="post-aside">
+            <p class="toc-label">En este artículo</p>
+            <ol class="toc" data-toc></ol>
+            <button class="copy-link" type="button" data-copy-link>Copiar enlace</button>
+          </aside>
+
+          <div class="prose">
+<p>"Queremos un ChatGPT que conozca nuestros manuales, políticas y contratos." Es probablemente el pedido más frecuente que recibo. La técnica detrás se llama <strong>RAG</strong> (Retrieval-Augmented Generation): antes de responder, el sistema busca los fragmentos relevantes en tus documentos y se los entrega al modelo como contexto.</p>
+<p>La idea fue formalizada por Lewis y colaboradores en 2020, que combinaron un modelo generativo con un componente de recuperación sobre una base de conocimiento externa <a class="cite" href="#ref-1" aria-label="Referencia 1">[1]</a>. Hacer una demo toma una tarde. Hacer que funcione bien con miles de documentos reales es otra historia.</p>
+
+<h2>La mayoría de errores vienen de la recuperación</h2>
+<p>Cuando un asistente RAG responde mal, el modelo rara vez es el culpable. Lo habitual es que no recibió el fragmento correcto. Por eso dedico la mayor parte del esfuerzo a la recuperación:</p>
+<ul>
+  <li><strong>Fragmentación con sentido.</strong> Cortar documentos por secciones y títulos, no cada cierto número de caracteres.</li>
+  <li><strong>Búsqueda híbrida.</strong> Combinar embeddings, que capturan significado, con búsqueda léxica tipo BM25, que encuentra códigos, nombres y términos exactos.</li>
+  <li><strong>Reordenamiento (reranking).</strong> Recuperar muchos candidatos y usar un modelo especializado para quedarse con los más relevantes.</li>
+  <li><strong>Metadatos y filtros.</strong> Fecha, área, producto, vigencia. Un contrato vencido no debería competir con el vigente.</li>
+</ul>
+<p>Anthropic publicó en 2024 una técnica llamada <em>Contextual Retrieval</em>, que añade a cada fragmento un breve contexto generado sobre el documento al que pertenece. En sus pruebas, esto redujo las recuperaciones fallidas en 35&nbsp;% con embeddings contextuales, en 49&nbsp;% al combinarlos con BM25 contextual y en 67&nbsp;% al sumar reranking <a class="cite" href="#ref-2" aria-label="Referencia 2">[2]</a>. Son resultados de sus propios benchmarks, pero ilustran bien cuánto se gana trabajando la recuperación.</p>
+
+<h2>Evaluar antes de lanzar</h2>
+<p>Un asistente RAG sin evaluación es una caja negra. El marco <strong>RAGAS</strong>, propuesto por Es y colaboradores en 2023, sistematiza la evaluación en dimensiones como la fidelidad de la respuesta al contexto recuperado, la relevancia de la respuesta respecto a la pregunta y la relevancia del contexto recuperado <a class="cite" href="#ref-3" aria-label="Referencia 3">[3]</a>.</p>
+<p>En la práctica, armo tres cosas desde la primera semana:</p>
+<ol>
+  <li><strong>Un set dorado</strong> de 100 a 300 preguntas reales, con la respuesta esperada y el documento fuente.</li>
+  <li><strong>Métricas automáticas</strong> de recuperación (¿llegó el fragmento correcto?) y de respuesta (¿es fiel al contexto?).</li>
+  <li><strong>Revisión humana por muestreo</strong> de conversaciones reales en producción, cada semana.</li>
+</ol>
+<p>Cada cambio de prompt, de modelo o de estrategia de fragmentación se valida contra ese set antes de desplegarse.</p>
+
+<h2>Seguridad: el vector store también es un activo sensible</h2>
+<p>El OWASP Top 10 para LLM dedica una categoría a las debilidades en vectores y embeddings <a class="cite" href="#ref-4" aria-label="Referencia 4">[4]</a>. Los dos problemas que más encuentro:</p>
+<ul>
+  <li><strong>Permisos ignorados.</strong> Si indexas todo en un solo índice, cualquier usuario puede terminar recibiendo fragmentos de documentos que no debería ver. Los permisos del documento original deben viajar como metadatos y aplicarse en cada consulta.</li>
+  <li><strong>Contenido envenenado.</strong> Un documento con instrucciones ocultas puede convertirse en una inyección de prompt indirecta. El contenido recuperado se trata como dato, nunca como instrucción.</li>
+</ul>
+
+<h2>Detalles que hacen la diferencia</h2>
+<ul>
+  <li><strong>Citar siempre la fuente.</strong> Cada respuesta enlaza al documento y la sección de donde salió. Genera confianza y facilita detectar errores.</li>
+  <li><strong>Permitir decir "no sé".</strong> Si no se recuperó nada relevante, el asistente debe decirlo y derivar a una persona, en lugar de improvisar.</li>
+  <li><strong>Mantener el índice vivo.</strong> Un proceso que reindexe cuando un documento cambia o vence.</li>
+</ul>
+
+<h2>En resumen</h2>
+<p>RAG es la forma más rápida y económica de poner el conocimiento de una empresa al alcance de su equipo y sus clientes. El éxito depende menos del modelo y más de tres disciplinas: recuperar bien, evaluar siempre y respetar los permisos de cada documento.</p>
+            <section class="post-refs" aria-labelledby="refs-title">
+              <h2 id="refs-title">Referencias</h2>
+              <ol>
+                <li id="ref-1">Lewis, P. et al. (2020). <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</em>. arXiv:2005.11401. <a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2005.11401</a></li>
+                <li id="ref-2">Anthropic (19 de septiembre de 2024). <em>Introducing Contextual Retrieval</em>. <a href="https://www.anthropic.com/news/contextual-retrieval" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/news/contextual-retrieval</a></li>
+                <li id="ref-3">Es, S., James, J., Espinosa-Anke, L. y Schockaert, S. (2023). <em>RAGAS: Automated Evaluation of Retrieval Augmented Generation</em>. arXiv:2309.15217. <a href="https://arxiv.org/abs/2309.15217" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2309.15217</a></li>
+                <li id="ref-4">OWASP GenAI Security Project. <em>OWASP Top 10 for LLM Applications 2025</em> (LLM08: Vector and Embedding Weaknesses). <a href="https://genai.owasp.org/llm-top-10/" target="_blank" rel="noopener noreferrer">https://genai.owasp.org/llm-top-10/</a></li>
+              </ol>
+            </section>
+
+            <section class="author-box" data-author-box aria-label="Sobre el autor"></section>
+          </div>
+        </div>
+      </article>
+
+      <section class="container related">
+        <h2 class="heading">Sigue leyendo</h2>
+        <div class="post-grid" data-related></div>
+      </section>
+
+      <section class="container post-cta">
+        <div>
+          <p class="eyebrow">A.I. Consulting</p>
+          <h2 class="heading">¿Quieres aplicar esto en <em>tu empresa?</em></h2>
+          <p>Te ayudamos a diseñar, construir y operar soluciones de IA seguras y con resultados medibles.</p>
+        </div>
+        <a class="btn btn-primary" href="/#contacto">Agenda una llamada</a>
+      </section>
+    </main>
+
+    <!-- include:footer -->
+
+    <script type="module" src="/src/page.js"></script>
+  </body>
+</html>
