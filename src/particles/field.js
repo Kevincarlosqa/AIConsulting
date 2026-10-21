@@ -1,4 +1,4 @@
-import { PALETTE, RIM, aspectShapes, generators, mulberry32, rotations } from './shapes.js';
+import { PALETTE, PALETTE_LIGHT, RIM, aspectShapes, generators, mulberry32, rotations } from './shapes.js';
 
 const TAU = Math.PI * 2;
 // Kept low so the field reads as texture behind the copy
@@ -13,6 +13,8 @@ const TETRA_VERTS = [
 ].map((v) => v.map((c) => c / Math.sqrt(3)));
 const TETRA_EDGES = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
 const TETRA_COLORS = ['#c9a45c', '#9a9a98', '#d6d6d4', '#6f6f6d'];
+// Same tones for the light theme, inverted so the brightest silver becomes the darkest ink
+const TETRA_COLORS_LIGHT = ['#9c7432', '#7e7e80', '#4a4a4c', '#a3a3a1'];
 
 const smoothstep = (t) => t * t * (3 - 2 * t);
 
@@ -137,7 +139,7 @@ export class ParticleField {
         y: rand(),
         depth,
         size: (big ? 34 + rand() * 30 : 7 + rand() * 16) * (0.6 + depth * 0.6),
-        color: TETRA_COLORS[Math.floor(rand() * TETRA_COLORS.length)],
+        tone: Math.floor(rand() * TETRA_COLORS.length),
         alpha: big ? 0.14 : 0.18 + rand() * 0.16,
         rx: rand() * TAU,
         ry: rand() * TAU,
@@ -247,8 +249,9 @@ export class ParticleField {
     }
   }
 
-  drawTetras(time) {
+  drawTetras(time, light) {
     const { ctx, dpr, width, height, pointer } = this;
+    const colors = light ? TETRA_COLORS_LIGHT : TETRA_COLORS;
     const span = height + 200;
     ctx.lineWidth = 1.2 * dpr;
 
@@ -271,7 +274,7 @@ export class ParticleField {
         return [(x0 + (x * cy + z1 * sy) * t.size) * dpr, (y0 + y1 * t.size) * dpr];
       });
 
-      ctx.strokeStyle = t.color;
+      ctx.strokeStyle = colors[t.tone];
       ctx.globalAlpha = t.alpha;
       ctx.beginPath();
       TETRA_EDGES.forEach(([p, q]) => {
@@ -325,7 +328,10 @@ export class ParticleField {
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'lighter';
+    // Additive blending glows on the dark canvas but washes out on paper, so light mode paints plainly
+    const light = document.documentElement.dataset.theme === 'light';
+    const palette = light ? PALETTE_LIGHT : PALETTE;
+    ctx.globalCompositeOperation = light ? 'source-over' : 'lighter';
     ctx.lineWidth = this.dpr;
 
     const baseSize = 3.4 * this.dpr * Math.min(Math.max(Math.min(height, width) / 1000, 0.6), 1.2);
@@ -335,7 +341,7 @@ export class ParticleField {
       const n = bucketCounts[bucket];
       if (!n) continue;
       const list = buckets[bucket];
-      ctx.strokeStyle = PALETTE[Math.floor(bucket / ALPHAS.length)];
+      ctx.strokeStyle = palette[Math.floor(bucket / ALPHAS.length)];
       ctx.globalAlpha = ALPHAS[bucket % ALPHAS.length];
       ctx.beginPath();
       for (let j = 0; j < n; j++) {
@@ -352,7 +358,7 @@ export class ParticleField {
       ctx.stroke();
     }
 
-    this.drawTetras(time);
+    this.drawTetras(time, light);
     requestAnimationFrame(this.frame);
   }
 }

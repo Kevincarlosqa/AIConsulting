@@ -43,7 +43,7 @@ const templates = {
   chat: () =>
     phone(
       `<div class="m-chat">
-        <div class="m-chat-head"><span class="m-avatar"></span><div><b>Asistente PronoIA</b><small>en línea</small></div></div>
+        <div class="m-chat-head"><span class="m-avatar"></span><div><b>Asistente A.I.</b><small>en línea</small></div></div>
         <div class="m-msgs">
           <p class="m-in">Hola, ¿tienen cita para mañana?</p>
           <p class="m-out">¡Claro! Tengo 10:30 y 16:00. ¿Cuál prefieres?</p>
@@ -57,7 +57,7 @@ const templates = {
 
   dashboard: () =>
     browser(
-      'panel.pronoia.pe',
+      'panel.aiconsulting.pe',
       `<div class="m-dash">
         <nav class="m-nav"><i></i><i class="on"></i><i></i><i></i><i></i></nav>
         <div class="m-main">
@@ -148,7 +148,7 @@ const templates = {
 
   kanban: () =>
     browser(
-      'crm.pronoia.pe/pipeline',
+      'crm.aiconsulting.pe/pipeline',
       `<div class="m-kanban">
         ${['Nuevo', 'Calificado', 'Propuesta', 'Cierre']
           .map(

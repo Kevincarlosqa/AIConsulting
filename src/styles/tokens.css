@@ -1,4 +1,7 @@
-:root {
+/* Dark is the default theme. Product mockups (.screen) keep it in light mode
+   too, so they always read as real dark interfaces. */
+:root,
+.screen {
   /* Color — graphite greys with a restrained gold accent */
   --color-bg: #0e0f11;
   --color-surface: #16171a;
@@ -14,6 +17,47 @@
   --color-error: #e0917f;
   --color-success: #9fc0a2;
 
+  /* Channels for translucent surfaces: rgba(var(--color-surface-rgb), 0.9) */
+  --color-bg-rgb: 14, 15, 17;
+  --color-surface-rgb: 22, 23, 26;
+  --color-surface-2-rgb: 29, 30, 34;
+  --color-text-rgb: 236, 235, 231;
+  --color-gold-rgb: 201, 164, 92;
+  --color-prose: #d9d8d4;
+
+  /* Soft dark halo that keeps copy legible over the particle field */
+  --text-halo: 0 1px 2px rgba(14, 15, 17, 0.9), 0 0 24px rgba(14, 15, 17, 0.85);
+  --shadow-pop: 0 20px 40px -20px rgba(0, 0, 0, 0.85);
+}
+
+/* Light theme: warm paper with ink greys; the gold is deepened so it keeps contrast */
+:root[data-theme='light'] {
+  --color-bg: #f5f3ee;
+  --color-surface: #fbfaf7;
+  --color-surface-2: #eeebe4;
+  --color-text: #16171a;
+  --color-muted: #4f4e4a;
+  --color-subtle: #6b6a65;
+  --color-line: rgba(22, 23, 26, 0.1);
+  --color-line-strong: rgba(22, 23, 26, 0.2);
+  --color-gold: #8a6628;
+  --color-gold-light: #a57a30;
+  --color-gold-deep: #6f511e;
+  --color-error: #b4442c;
+  --color-success: #3f7a48;
+
+  --color-bg-rgb: 245, 243, 238;
+  --color-surface-rgb: 251, 250, 247;
+  --color-surface-2-rgb: 238, 235, 228;
+  --color-text-rgb: 22, 23, 26;
+  --color-gold-rgb: 138, 102, 40;
+  --color-prose: #2a2b2f;
+
+  --text-halo: 0 1px 2px rgba(245, 243, 238, 0.9), 0 0 24px rgba(245, 243, 238, 0.85);
+  --shadow-pop: 0 20px 40px -20px rgba(60, 50, 30, 0.3);
+}
+
+:root {
   /* Type */
   --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Instrument Serif', 'Times New Roman', serif;
@@ -35,9 +79,6 @@
   --section-pad: clamp(88px, 11vw, 150px);
   --radius: 16px;
   --radius-pill: 999px;
-
-  /* Soft dark halo that keeps copy legible over the particle field */
-  --text-halo: 0 1px 2px rgba(14, 15, 17, 0.9), 0 0 24px rgba(14, 15, 17, 0.85);
 
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);

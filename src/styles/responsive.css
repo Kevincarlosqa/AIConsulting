@@ -59,7 +59,7 @@
     align-items: flex-start;
     gap: 22px;
     padding: 24px var(--gutter) 32px;
-    background: rgba(14, 15, 17, 0.97);
+    background: rgba(var(--color-bg-rgb), 0.97);
     border-bottom: 1px solid var(--color-line);
     opacity: 0;
     visibility: hidden;
@@ -68,7 +68,7 @@
   }
 
   .top-bar.is-open {
-    background: rgba(14, 15, 17, 0.97);
+    background: rgba(var(--color-bg-rgb), 0.97);
   }
 
   .top-bar.is-open .nav {

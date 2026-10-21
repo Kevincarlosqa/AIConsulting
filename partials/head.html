@@ -1,8 +1,27 @@
-    <!-- Critical styles: paint the dark canvas and the transition curtain before any CSS file loads -->
+    <!-- Theme: a saved choice wins, otherwise follow the system. Runs before paint so there is no flash -->
+    <script>
+      (() => {
+        let theme = null;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <!-- Critical styles: paint the canvas and the transition curtain before any CSS file loads -->
     <style>
       html {
+        --pt-panel: #131417;
         background: #0e0f11;
         color-scheme: dark;
+      }
+      html[data-theme='light'] {
+        --pt-panel: #ebe8e1;
+        background: #f5f3ee;
+        color-scheme: light;
       }
       .js .pt {
         position: fixed;
@@ -19,7 +38,7 @@
         bottom: 0;
         left: calc(var(--i) * 20% - 1px);
         width: calc(20% + 2px);
-        background: #131417;
+        background: var(--pt-panel);
       }
       html:not(.js) .pt {
         display: none;

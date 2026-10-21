@@ -12,11 +12,13 @@ import { initProjects } from './ui/projects.js';
 import { initReveal } from './ui/reveal.js';
 import { initScrollStory } from './ui/scroll-story.js';
 import { initPageTransition } from './ui/page-transition.js';
+import { initTheme } from './ui/theme.js';
 import { initSmoothScroll } from './ui/smooth-scroll.js';
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 initPageTransition({ reduceMotion });
+initTheme();
 initSmoothScroll({ reduceMotion });
 initNav();
 initProjects({ reduceMotion });

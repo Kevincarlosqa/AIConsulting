@@ -164,21 +164,65 @@
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
 }
 
-.logo-mark {
-  width: 26px;
+.logo-img {
+  width: auto;
   height: 26px;
 }
 
-.logo-word {
-  font-size: 19px;
-  font-weight: 500;
-  letter-spacing: -0.03em;
+/* One artwork per background; only the one for the current theme shows */
+.logo-img--on-light,
+[data-theme='light'] .logo-img--on-dark {
+  display: none;
 }
 
-.logo-word b {
-  color: var(--color-gold);
-  font-weight: 600;
+[data-theme='light'] .logo-img--on-light {
+  display: block;
+}
+
+/* ---------- Theme toggle ---------- */
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 50%;
+  background: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-gold);
+  color: var(--color-text);
+}
+
+.theme-icon {
+  grid-area: 1 / 1;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 0.4s var(--ease), transform 0.6s var(--ease);
+}
+
+/* Shows the theme it switches to: the sun in dark mode, the moon in light mode */
+.theme-icon--moon,
+[data-theme='light'] .theme-icon--sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+
+[data-theme='light'] .theme-icon--moon {
+  opacity: 1;
+  transform: none;
 }

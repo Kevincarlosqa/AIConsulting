@@ -12,7 +12,7 @@ const labelFor = (link, url) => {
   if (url.pathname.startsWith('/privacidad')) return 'Privacidad';
   if (url.pathname.startsWith('/blog/') && url.pathname !== '/blog/') return 'Artículo';
   if (url.pathname.startsWith('/blog')) return 'Blog';
-  return 'PronoIA';
+  return 'A.I. Consulting';
 };
 
 // Only plain clicks on links to another page of this site

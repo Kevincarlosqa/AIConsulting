@@ -12,6 +12,17 @@ export const PALETTE = [
   '#858583', // 6 mid grey
 ];
 
+// Light theme counterpart, index for index: ink greys and a deeper gold that hold up on paper
+export const PALETTE_LIGHT = [
+  '#9c7432', // 0 gold
+  '#3a3a3d', // 1 ink
+  '#6a6a6c', // 2 grey
+  '#9a9a98', // 3 pale graphite
+  '#4a4a4c', // 4 dark grey
+  '#7d5b24', // 5 deep gold
+  '#7e7e80', // 6 mid grey
+];
+
 export const RIM = 0;
 
 const TAU = Math.PI * 2;
