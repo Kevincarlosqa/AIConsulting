@@ -5,6 +5,27 @@ const TAU = Math.PI * 2;
 const ALPHAS = [0.2, 0.36, 0.56];
 const MOBILE = 860;
 
+// Render quality, best first. Fill cost grows with dpr², so resolution is the main lever;
+// the last level also draws every other particle. Phones start one level down.
+const QUALITY = [
+  { dpr: 1.5, stride: 1 },
+  { dpr: 1.25, stride: 1 },
+  { dpr: 1, stride: 1 },
+  { dpr: 1, stride: 2 },
+];
+// Frames averaging slower than this over a sample drop the quality one level
+const SLOW_FRAME_MS = 22;
+const SAMPLE_FRAMES = 45;
+// The first moments (curtain, font swap, first layout) are always busy, so they aren't judged
+const WARMUP_MS = 2500;
+
+// Document offset from the layout itself, so CSS transforms (the page-in animation) can't skew it
+const pageTop = (el) => {
+  let y = 0;
+  for (let node = el; node; node = node.offsetParent) y += node.offsetTop;
+  return y;
+};
+
 const TETRA_VERTS = [
   [1, 1, 1],
   [1, -1, -1],
@@ -33,9 +54,15 @@ export class ParticleField {
     this.shapes = {};
     this.smoothScroll = window.scrollY;
     this.start = performance.now();
+    this.quality = 0;
+    this.stride = 1;
+    this.lastFrame = 0;
+    this.sampleTime = 0;
+    this.sampleCount = 0;
 
     this.frame = this.frame.bind(this);
     this.resize = this.resize.bind(this);
+    this.measureSections = this.measureSections.bind(this);
     this.buildTetras();
   }
 
@@ -44,6 +71,10 @@ export class ParticleField {
 
     this.resize();
     window.addEventListener('resize', this.resize);
+    // Section positions are cached; any section changing size (images, the pinned projects
+    // section, reflowed copy) shifts the ones below it, so all are measured again
+    const observer = new ResizeObserver(this.measureSections);
+    this.sections.forEach((el) => observer.observe(el));
     window.addEventListener('pointermove', (event) => {
       this.pointer.tx = event.clientX / window.innerWidth - 0.5;
       this.pointer.ty = event.clientY / window.innerHeight - 0.5;
@@ -52,14 +83,13 @@ export class ParticleField {
   }
 
   resize() {
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    this.canvas.width = Math.round(this.width * this.dpr);
-    this.canvas.height = Math.round(this.height * this.dpr);
 
     // Landscape phones are too short for the stacked layout, so they use the desktop one
     const mobile = this.width < MOBILE && this.height > 500;
+    this.quality = Math.max(this.quality, mobile ? 1 : 0);
+    this.applyQuality();
     const count = mobile ? 1500 : 3000;
     const aspect = this.width / this.height;
     // Shapes scale with the smaller of height and width so they fit phones, tablets and laptops alike
@@ -86,8 +116,45 @@ export class ParticleField {
         if (mobile && d[mobileKey] !== undefined) return Number(d[mobileKey]);
         return d[key] !== undefined ? Number(d[key]) : fallback;
       };
-      return { el, shape: d.shape, x: value('x', 0.5), y: value('y', 0.5), scale: value('scale', 1) };
+      return { el, shape: d.shape, x: value('x', 0.5), y: value('y', 0.5), scale: value('scale', 1), top: 0, height: 0 };
     });
+    this.measureSections();
+  }
+
+  measureSections() {
+    if (!this.states) return;
+    this.states.forEach((state) => {
+      state.top = pageTop(state.el);
+      state.height = state.el.offsetHeight;
+    });
+  }
+
+  applyQuality() {
+    const { dpr, stride } = QUALITY[this.quality];
+    this.dpr = Math.min(window.devicePixelRatio || 1, dpr);
+    this.stride = stride;
+    this.canvas.width = Math.round(this.width * this.dpr);
+    this.canvas.height = Math.round(this.height * this.dpr);
+  }
+
+  // Drops a quality level when frames run long for a sustained stretch. It never steps
+  // back up, so a device that is borderline settles instead of flickering between levels.
+  watchFrameRate(now) {
+    const delta = now - this.lastFrame;
+    this.lastFrame = now;
+    // Long gaps are a hidden tab or a paused page, not slow rendering
+    if (now - this.start < WARMUP_MS || delta > 250 || this.quality >= QUALITY.length - 1) return;
+
+    this.sampleTime += delta;
+    if (++this.sampleCount < SAMPLE_FRAMES) return;
+
+    const slow = this.sampleTime / this.sampleCount > SLOW_FRAME_MS;
+    this.sampleTime = 0;
+    this.sampleCount = 0;
+    if (slow) {
+      this.quality++;
+      this.applyQuality();
+    }
   }
 
   allocate() {
@@ -154,10 +221,11 @@ export class ParticleField {
   blend() {
     const vh = this.height;
     const mid = vh / 2;
-    const spans = this.states.map(({ el }) => {
-      const rect = el.getBoundingClientRect();
-      const start = rect.top + Math.min(rect.height, vh) / 2;
-      return [start, Math.max(start, rect.bottom - vh / 2)];
+    const scroll = window.scrollY;
+    const spans = this.states.map(({ top: pageY, height }) => {
+      const top = pageY - scroll;
+      const start = top + Math.min(height, vh) / 2;
+      return [start, Math.max(start, top + height - vh / 2)];
     });
 
     const last = spans.length - 1;
@@ -288,6 +356,7 @@ export class ParticleField {
   frame(now) {
     const { ctx, canvas, pointer, a, b, px, py, pp, speed, stagger, buckets, bucketCounts, reduceMotion } = this;
     const time = reduceMotion ? 0 : (now - this.start) / 1000;
+    this.watchFrameRate(now);
 
     pointer.x += (pointer.tx - pointer.x) * 0.05;
     pointer.y += (pointer.ty - pointer.y) * 0.05;
@@ -302,7 +371,7 @@ export class ParticleField {
     bucketCounts.fill(0);
     const { width, height } = this;
 
-    for (let i = 0; i < this.count; i++) {
+    for (let i = 0; i < this.count; i += this.stride) {
       const tx = same ? a.x[i] : a.x[i] + (b.x[i] - a.x[i]) * t;
       const ty = same ? a.y[i] : a.y[i] + (b.y[i] - a.y[i]) * t;
       const tp = same ? a.p[i] : a.p[i] + (b.p[i] - a.p[i]) * t;
