@@ -1,7 +1,7 @@
 // Sends the form to VITE_CONTACT_ENDPOINT (Formspree, a serverless function, etc.).
 // Without an endpoint it falls back to opening the visitor's mail client.
 const ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT;
-const EMAIL = import.meta.env.VITE_CONTACT_EMAIL || 'hola@aiconsulting.pe';
+const EMAIL = import.meta.env.VITE_CONTACT_EMAIL || 'hola@pronoia.pe';
 
 export function initContact() {
   const form = document.querySelector('[data-contact]');

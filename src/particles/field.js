@@ -58,7 +58,7 @@ export class ParticleField {
 
     // Landscape phones are too short for the stacked layout, so they use the desktop one
     const mobile = this.width < MOBILE && this.height > 500;
-    const count = mobile ? 2000 : 3500;
+    const count = mobile ? 1500 : 3000;
     const aspect = this.width / this.height;
     // Shapes scale with the smaller of height and width so they fit phones, tablets and laptops alike
     this.unit = mobile

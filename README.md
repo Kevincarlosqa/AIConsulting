@@ -1,6 +1,6 @@
-# A.I. Consulting — sitio web
+# PronoIA — sitio web
 
-Sitio de A.I. Consulting (Andes Intelligence Consulting), consultora peruana de IA, automatización y desarrollo web. Vite + JavaScript sin frameworks, con un campo de partículas en canvas que cambia de forma con el scroll.
+Sitio de PronoIA, consultora peruana de IA, automatización y desarrollo web. Vite + JavaScript sin frameworks, con un campo de partículas en canvas que cambia de forma con el scroll.
 
 ## Desarrollo
 

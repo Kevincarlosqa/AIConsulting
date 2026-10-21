@@ -1,9 +1,9 @@
 {
-  "name": "aiconsulting-site",
+  "name": "pronoia-site",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Sitio de A.I. Consulting (Andes Intelligence Consulting) — consultora de IA, automatizaciones y desarrollo web.",
+  "description": "Sitio de PronoIA — consultora de IA, automatizaciones y desarrollo web.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
