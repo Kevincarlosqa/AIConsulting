@@ -173,23 +173,29 @@ export default async function handler(req, res) {
     timeZone: 'America/Lima',
   }).format(new Date());
 
-  const form = new FormData();
-  form.append('from', CONTACT_FROM || `Andes Intelligence Web <postmaster@${MAILGUN_DOMAIN}>`);
-  form.append('to', CONTACT_TO);
-  form.append('subject', `Nuevo contacto: ${lead.nombre}${lead.empresa ? ` · ${lead.empresa}` : ''}`);
-  form.append('text', renderText(lead));
-  form.append('html', renderHtml(lead, receivedAt));
-  form.append('h:Reply-To', `"${lead.nombre.replace(/[<>"\\\r\n]/g, '')}" <${lead.email}>`);
+  const message = {
+    from: CONTACT_FROM || `Andes Intelligence Web <postmaster@${MAILGUN_DOMAIN}>`,
+    subject: `Nuevo contacto: ${lead.nombre}${lead.empresa ? ` · ${lead.empresa}` : ''}`,
+    text: renderText(lead),
+    html: renderHtml(lead, receivedAt),
+    'h:Reply-To': `"${lead.nombre.replace(/[<>"\\\r\n]/g, '')}" <${lead.email}>`,
+  };
 
-  const response = await fetch(`${MAILGUN_API_BASE}/v3/${MAILGUN_DOMAIN}/messages`, {
-    method: 'POST',
-    headers: { Authorization: `Basic ${Buffer.from(`api:${MAILGUN_API_KEY}`).toString('base64')}` },
-    body: form,
-  });
+  // One message per recipient: Mailgun rejects the whole message if any address is refused
+  // (e.g. not yet an authorized recipient on a sandbox domain), so the others still get theirs
+  const recipients = CONTACT_TO.split(',').map((to) => to.trim()).filter(Boolean);
+  const results = await Promise.all(
+    recipients.map(async (to) => {
+      const response = await fetch(`${MAILGUN_API_BASE}/v3/${MAILGUN_DOMAIN}/messages`, {
+        method: 'POST',
+        headers: { Authorization: `Basic ${Buffer.from(`api:${MAILGUN_API_KEY}`).toString('base64')}` },
+        body: new URLSearchParams({ ...message, to }),
+      });
+      if (!response.ok) console.error('Mailgun', to, response.status, await response.text());
+      return response.ok;
+    }),
+  );
 
-  if (!response.ok) {
-    console.error('Mailgun', response.status, await response.text());
-    return res.status(502).json({ error: 'No se pudo enviar el correo' });
-  }
+  if (!results.some(Boolean)) return res.status(502).json({ error: 'No se pudo enviar el correo' });
   return res.status(200).json({ ok: true });
 }
