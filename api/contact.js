@@ -2,12 +2,16 @@
 // The Mailgun key lives only here, never in the browser bundle.
 const {
   MAILGUN_API_KEY,
-  MAILGUN_DOMAIN,
+  MAILGUN_DOMAIN = 'sandbox69ac2f66be574b86aec61874bdf9a22a.mailgun.org',
   MAILGUN_API_BASE = 'https://api.mailgun.net',
   CONTACT_TO = 'sami@andesintelligence.com.pe,kevincarlosqa@gmail.com',
   CONTACT_FROM,
-  SITE_URL = 'https://andesintelligence.com.pe',
+  VERCEL_PROJECT_PRODUCTION_URL,
 } = process.env;
+
+// Vercel provides the production domain automatically; it hosts the logo used in the email
+const SITE_URL =
+  process.env.SITE_URL || (VERCEL_PROJECT_PRODUCTION_URL ? `https://${VERCEL_PROJECT_PRODUCTION_URL}` : 'https://andesintelligence.com.pe');
 
 const escape = (value = '') =>
   String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -103,7 +107,7 @@ export default async function handler(req, res) {
   }
 
   const form = new URLSearchParams({
-    from: CONTACT_FROM || `Web Andes Intelligence <web@${MAILGUN_DOMAIN}>`,
+    from: CONTACT_FROM || `Web Andes Intelligence <postmaster@${MAILGUN_DOMAIN}>`,
     to: CONTACT_TO,
     subject: `Nuevo contacto: ${lead.nombre}${lead.empresa ? ` (${lead.empresa})` : ''}`,
     text: renderText(lead),
