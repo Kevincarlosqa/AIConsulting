@@ -1,5 +1,7 @@
 // Serverless function (Vercel) that receives the contact form and emails it through Mailgun.
 // The Mailgun key lives only here, never in the browser bundle.
+import { readFile } from 'node:fs/promises';
+
 const {
   MAILGUN_API_KEY,
   MAILGUN_DOMAIN = 'sandbox69ac2f66be574b86aec61874bdf9a22a.mailgun.org',
@@ -9,62 +11,114 @@ const {
   VERCEL_PROJECT_PRODUCTION_URL,
 } = process.env;
 
-// Vercel provides the production domain automatically; it hosts the logo used in the email
 const SITE_URL =
   process.env.SITE_URL || (VERCEL_PROJECT_PRODUCTION_URL ? `https://${VERCEL_PROJECT_PRODUCTION_URL}` : 'https://andesintelligence.com.pe');
+
+// The logo travels inside the email (cid:logo.png), so it shows regardless of where the site is hosted
+const LOGO_FILE = new URL('../public/logo-claro-web.png', import.meta.url);
+
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif";
 
 const escape = (value = '') =>
   String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
 const clean = (value, max = 200) => String(value ?? '').trim().slice(0, max);
 
-const row = (label, value) => `
-  <tr>
-    <td style="padding:10px 0;border-bottom:1px solid #ece9e2;width:150px;vertical-align:top;color:#6b6a65;font-size:13px;text-transform:uppercase;letter-spacing:.06em;">${label}</td>
-    <td style="padding:10px 0;border-bottom:1px solid #ece9e2;vertical-align:top;color:#16171a;font-size:15px;">${value}</td>
-  </tr>`;
+const label = (text) =>
+  `<p style="margin:0 0 6px;color:#71717a;font-size:12px;font-weight:500;letter-spacing:.02em;">${text}</p>`;
 
-const renderHtml = (lead) => `<!DOCTYPE html>
+const detail = (title, value) => `
+  <td width="50%" valign="top" style="padding:0 6px 12px;">
+    <div style="border:1px solid #ececef;border-radius:12px;padding:14px 16px;">
+      ${label(title)}
+      <p style="margin:0;color:#18181b;font-size:15px;font-weight:500;line-height:1.4;word-break:break-word;">${value}</p>
+    </div>
+  </td>`;
+
+const chips = (items) =>
+  items.length
+    ? items
+        .map(
+          (item) =>
+            `<span style="display:inline-block;margin:0 6px 6px 0;padding:5px 11px;border-radius:999px;background:#f7f1e4;color:#7a5c24;font-size:13px;font-weight:500;">${escape(item)}</span>`,
+        )
+        .join('')
+    : '<span style="color:#a1a1aa;font-size:14px;">No indicó</span>';
+
+const renderHtml = (lead, receivedAt) => {
+  const firstName = escape(lead.nombre.split(' ')[0]);
+  const email = escape(lead.email);
+  const replyHref = `mailto:${email}?subject=${encodeURIComponent('Re: tu proyecto con Andes Intelligence')}`;
+
+  return `<!DOCTYPE html>
 <html lang="es">
-<body style="margin:0;padding:0;background:#f5f3ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ee;padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);">
-        <tr>
-          <td style="background:#0e0f11;padding:28px 32px;border-bottom:3px solid #c9a45c;">
-            <img src="${SITE_URL}/logo-oscuro-web.png" alt="Andes Intelligence" width="220" style="display:block;width:220px;max-width:100%;height:auto;border:0;" />
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:32px;">
-            <p style="margin:0 0 4px;color:#9c7c3f;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;">Nuevo contacto desde la web</p>
-            <h1 style="margin:0 0 24px;color:#16171a;font-size:22px;line-height:1.3;">${escape(lead.nombre)} quiere hablar con ustedes</h1>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-              ${row('Nombre', escape(lead.nombre))}
-              ${row('Correo', `<a href="mailto:${escape(lead.email)}" style="color:#9c7c3f;text-decoration:none;">${escape(lead.email)}</a>`)}
-              ${row('Empresa', escape(lead.empresa) || '—')}
-              ${row('Servicios', escape(lead.servicios) || '—')}
-              ${row('Presupuesto', escape(lead.presupuesto) || '—')}
-            </table>
-            <p style="margin:28px 0 8px;color:#6b6a65;font-size:13px;text-transform:uppercase;letter-spacing:.06em;">Mensaje</p>
-            <div style="background:#f5f3ee;border-left:3px solid #c9a45c;border-radius:6px;padding:16px 18px;color:#16171a;font-size:15px;line-height:1.6;white-space:pre-wrap;">${escape(lead.mensaje)}</div>
-            <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:28px;">
-              <tr><td style="background:#c9a45c;border-radius:8px;">
-                <a href="mailto:${escape(lead.email)}?subject=${encodeURIComponent('Re: tu proyecto con Andes Intelligence')}" style="display:inline-block;padding:12px 22px;color:#0e0f11;font-size:15px;font-weight:600;text-decoration:none;">Responder a ${escape(lead.nombre.split(' ')[0])}</a>
-              </td></tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:18px 32px;background:#fbfaf7;border-top:1px solid #ece9e2;color:#82817d;font-size:12px;line-height:1.5;">
-            El cliente aceptó la política de privacidad · Enviado desde <a href="${SITE_URL}" style="color:#9c7c3f;text-decoration:none;">${SITE_URL.replace(/^https?:\/\//, '')}</a>
-          </td>
-        </tr>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Nuevo contacto</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:${FONT};-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escape(lead.nombre)}${lead.empresa ? ` de ${escape(lead.empresa)}` : ''} escribió desde la web: ${escape(lead.mensaje.slice(0, 90))}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+
+        <tr><td style="background:#ffffff;border:1px solid #e4e4e7;border-radius:16px;overflow:hidden;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="height:4px;background:#c9a45c;line-height:4px;font-size:0;">&nbsp;</td></tr>
+
+            <tr><td style="padding:28px 36px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td valign="middle"><img src="cid:logo.png" alt="Andes Intelligence" width="168" style="display:block;width:168px;height:auto;border:0;" /></td>
+                <td valign="middle" align="right" style="color:#a1a1aa;font-size:12px;">${receivedAt}</td>
+              </tr></table>
+            </td></tr>
+
+            <tr><td style="padding:8px 36px 0;">
+              <span style="display:inline-block;padding:5px 12px;border-radius:999px;background:#ecfdf3;color:#067647;font-size:12px;font-weight:600;">● Nuevo lead</span>
+              <h1 style="margin:16px 0 6px;color:#18181b;font-size:26px;font-weight:700;line-height:1.25;letter-spacing:-.02em;">${escape(lead.nombre)}</h1>
+              <p style="margin:0;color:#52525b;font-size:15px;line-height:1.5;">${lead.empresa ? `${escape(lead.empresa)} · ` : ''}<a href="mailto:${email}" style="color:#52525b;text-decoration:none;">${email}</a></p>
+            </td></tr>
+
+            <tr><td style="padding:28px 30px 4px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>${detail('Empresa', escape(lead.empresa) || '<span style="color:#a1a1aa;font-weight:400;">No indicó</span>')}${detail('Presupuesto', escape(lead.presupuesto) || '<span style="color:#a1a1aa;font-weight:400;">No indicó</span>')}</tr>
+              </table>
+            </td></tr>
+
+            <tr><td style="padding:8px 36px 0;">
+              ${label('Servicios de interés')}
+              <div style="padding-top:2px;">${chips(lead.servicios)}</div>
+            </td></tr>
+
+            <tr><td style="padding:22px 36px 0;">
+              ${label('Mensaje')}
+              <div style="background:#fafafa;border:1px solid #f0f0f2;border-radius:12px;padding:18px 20px;color:#27272a;font-size:15px;line-height:1.7;white-space:pre-wrap;">${escape(lead.mensaje)}</div>
+            </td></tr>
+
+            <tr><td style="padding:28px 36px 36px;">
+              <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+                <td style="background:#18181b;border-radius:10px;">
+                  <a href="${replyHref}" style="display:inline-block;padding:13px 24px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;">Responder a ${firstName} &rarr;</a>
+                </td>
+              </tr></table>
+              <p style="margin:14px 0 0;color:#a1a1aa;font-size:13px;">También puedes responder directamente a este correo.</p>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <tr><td align="center" style="padding:20px 24px 0;color:#a1a1aa;font-size:12px;line-height:1.6;">
+          Recibido desde el formulario de <a href="${SITE_URL}" style="color:#71717a;text-decoration:underline;">${SITE_URL.replace(/^https?:\/\//, '')}</a><br />
+          El cliente aceptó la política de privacidad.
+        </td></tr>
+
       </table>
     </td></tr>
   </table>
 </body>
 </html>`;
+};
 
 const renderText = (lead) =>
   [
@@ -73,7 +127,7 @@ const renderText = (lead) =>
     `Nombre: ${lead.nombre}`,
     `Correo: ${lead.email}`,
     `Empresa: ${lead.empresa || '—'}`,
-    `Servicios: ${lead.servicios || '—'}`,
+    `Servicios: ${lead.servicios.join(', ') || '—'}`,
     `Presupuesto: ${lead.presupuesto || '—'}`,
     '',
     lead.mensaje,
@@ -97,7 +151,7 @@ export default async function handler(req, res) {
     nombre: clean(body.nombre, 120),
     email: clean(body.email, 200),
     empresa: clean(body.empresa, 160),
-    servicios: (Array.isArray(body.servicios) ? body.servicios : []).map((s) => clean(s, 60)).join(', '),
+    servicios: (Array.isArray(body.servicios) ? body.servicios : []).map((s) => clean(s, 60)).filter(Boolean),
     presupuesto: clean(body.presupuesto, 60),
     mensaje: clean(body.mensaje, 5000),
   };
@@ -106,14 +160,20 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Datos incompletos' });
   }
 
-  const form = new URLSearchParams({
-    from: CONTACT_FROM || `Web Andes Intelligence <postmaster@${MAILGUN_DOMAIN}>`,
-    to: CONTACT_TO,
-    subject: `Nuevo contacto: ${lead.nombre}${lead.empresa ? ` (${lead.empresa})` : ''}`,
-    text: renderText(lead),
-    html: renderHtml(lead),
-    'h:Reply-To': `"${lead.nombre.replace(/[<>"\\\r\n]/g, '')}" <${lead.email}>`,
-  });
+  const receivedAt = new Intl.DateTimeFormat('es-PE', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'America/Lima',
+  }).format(new Date());
+
+  const form = new FormData();
+  form.append('from', CONTACT_FROM || `Andes Intelligence Web <postmaster@${MAILGUN_DOMAIN}>`);
+  form.append('to', CONTACT_TO);
+  form.append('subject', `Nuevo contacto: ${lead.nombre}${lead.empresa ? ` · ${lead.empresa}` : ''}`);
+  form.append('text', renderText(lead));
+  form.append('html', renderHtml(lead, receivedAt));
+  form.append('h:Reply-To', `"${lead.nombre.replace(/[<>"\\\r\n]/g, '')}" <${lead.email}>`);
+  form.append('inline', new Blob([await readFile(LOGO_FILE)], { type: 'image/png' }), 'logo.png');
 
   const response = await fetch(`${MAILGUN_API_BASE}/v3/${MAILGUN_DOMAIN}/messages`, {
     method: 'POST',
