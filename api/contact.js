@@ -4,7 +4,7 @@ const {
   MAILGUN_API_KEY,
   MAILGUN_DOMAIN = 'sandbox69ac2f66be574b86aec61874bdf9a22a.mailgun.org',
   MAILGUN_API_BASE = 'https://api.mailgun.net',
-  CONTACT_TO = 'sami@andesintelligence.com.pe,kevincarlosqa@gmail.com',
+  CONTACT_TO = 'sami@andesintelligence.io,kevincarlosqa@gmail.com',
   CONTACT_FROM,
   VERCEL_PROJECT_PRODUCTION_URL,
 } = process.env;
