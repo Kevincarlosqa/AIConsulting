@@ -45,7 +45,9 @@ Para crear una forma nueva, agrega un generador en `shapes.js` y su rotación en
 
 ## Formulario de contacto
 
-Copia `.env.example` a `.env` y define `VITE_CONTACT_ENDPOINT` con la URL que recibirá el JSON del formulario. Sin endpoint, el formulario abre el correo del visitante con el mensaje prellenado.
+El formulario envía un JSON a `/api/contact`, una función serverless de Vercel ([api/contact.js](api/contact.js)) que manda un correo HTML con el logo a los destinatarios de `CONTACT_TO` vía Mailgun. Las variables están en `.env.example`; las del servidor (`MAILGUN_*`, `CONTACT_*`, `SITE_URL`) van en **Vercel → Settings → Environment Variables**, nunca con prefijo `VITE_`, para que la API key no llegue al navegador.
+
+En local, `npm run dev` no ejecuta la función: usa `vercel dev` para probar el envío.
 
 ## Proyectos
 

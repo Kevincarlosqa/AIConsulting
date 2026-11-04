@@ -1,7 +1,7 @@
-// Sends the form to VITE_CONTACT_ENDPOINT (Formspree, a serverless function, etc.).
-// Without an endpoint it falls back to opening the visitor's mail client.
-const ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT;
-const EMAIL = import.meta.env.VITE_CONTACT_EMAIL || 'hola@aiconsulting.pe';
+// Sends the form to /api/contact (serverless function that emails it through Mailgun).
+// VITE_CONTACT_ENDPOINT overrides the URL, e.g. when the function lives on another host.
+const ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT || '/api/contact';
+const EMAIL = import.meta.env.VITE_CONTACT_EMAIL || 'sami@andesintelligence.com.pe';
 
 export function initContact() {
   const form = document.querySelector('[data-contact]');
@@ -32,21 +32,8 @@ export function initContact() {
       presupuesto: data.get('presupuesto'),
       mensaje: data.get('mensaje'),
       consentimiento: data.get('consentimiento') === 'si',
+      botcheck: data.get('botcheck') || '',
     };
-
-    if (!ENDPOINT) {
-      const body = [
-        `Nombre: ${payload.nombre}`,
-        `Empresa: ${payload.empresa || '—'}`,
-        `Servicios: ${payload.servicios.join(', ') || '—'}`,
-        `Presupuesto: ${payload.presupuesto || '—'}`,
-        '',
-        payload.mensaje,
-      ].join('\n');
-      window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(`Proyecto — ${payload.nombre}`)}&body=${encodeURIComponent(body)}`;
-      setStatus('Abrimos tu correo con el mensaje listo para enviar.', 'ok');
-      return;
-    }
 
     submit.disabled = true;
     setStatus('Enviando…');
